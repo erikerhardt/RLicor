@@ -1,0 +1,23 @@
+Package: RLicor
+Type: Package
+Title: Read Licor files
+Version: 0.0.00
+Author: Erik B. Erhardt <erike@stat.unm.edu>
+Maintainer: Erik B. Erhardt <erike@stat.unm.edu>
+Description: Reads Licor files from 6400 and 6800, detecting version automatically
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.6.0)
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
+Imports:
+    dplyr,
+    log4r,
+    magrittr,
+    readr,
+    stringr,
+    lubridate
