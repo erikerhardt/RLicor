@@ -58,7 +58,7 @@ read_Licor_6400 <-
 
   # date
   Licor$datetime <-
-    lubridate::ymd_hms(Licor$header) %>%
+    lubridate::mdy_hms(Licor$header) %>%
     stats::na.omit()
 
 

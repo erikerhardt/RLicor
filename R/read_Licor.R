@@ -20,6 +20,8 @@ read_Licor <-
   # Licor_fn <- "data_Licor_6400_6-1-3.txt"
   # Licor_fn <- "data_Licor_6400_6-1-4.txt"
   # Licor_fn <- "data_Licor_6800_.txt"
+  # dat_Licor <- read_Licor(Licor_fn)
+  # str(dat_Licor)
 
   # list can hold more options later, if helpful
   Licor_model <-
