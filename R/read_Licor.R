@@ -15,7 +15,7 @@ read_Licor <-
   ) {
 
   ## DEBUG
-  # path <- "C:/Dropbox/StatAcumen/consult/Authorship/2009_DavidHanson_Isotopes/R-package/RLicor/data-raw"
+  # path <- "C:/Dropbox/StatAcumen/consult/Authorship/2009_DavidHanson_Isotopes/package_testing/RLicor/data-raw"
   # setwd(path)
   # Licor_fn <- "data_Licor_6400_6-1-3.txt"
   # Licor_fn <- "data_Licor_6400_6-1-4.txt"
@@ -56,9 +56,6 @@ read_Licor <-
     message("Licor 6400 model")
     Licor <- read_Licor_6400(Licor_fn)
   }
-
-  # Include model version in output since output differs by model
-  Licor$model <- Licor_model$model
 
   return(Licor)
 }

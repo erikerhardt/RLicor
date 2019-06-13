@@ -21,6 +21,8 @@ read_Licor_6400 <-
   # header and data, separated
   Licor <- list()
 
+  Licor$model <- 6400
+
   # concepts from http://www.ericrscott.com/2018/01/17/li-cor-wrangling/
 
   # read data in as text to remove header and remark rows from column headers and data
@@ -36,13 +38,29 @@ read_Licor_6400 <-
   Licor_header_data <- stringr::str_split(Licor_bouts, data_pattern, simplify = FALSE)
 
   # separate header and data, remove empty elements (first is always empty)
+
+  ## Header
   Licor$header <-
     Licor_header_data %>%
     purrr::map(`[`, 1) %>% #equivalent to doing raw_split2[[i]][2] for every element "i"
     purrr::flatten_chr() #converts to a vector
   Licor$header <-
     Licor$header[!(Licor$header == "")]
+  Licor$header <-
+    str_split(
+      Licor$header
+    , "\n"
+    , simplify = TRUE
+    ) %>%
+    t()
 
+  # date
+  Licor$datetime <-
+    mdy_hms(Licor$header) %>%
+    na.omit()
+
+
+  ## Data
   dat_temp <-
     Licor_header_data %>%
     purrr::map(`[`, 2) %>% # equivalent to doing Licor_header_data[[i]][2] for every element "i"
