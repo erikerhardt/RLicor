@@ -1,3 +1,13 @@
+#' Read Licor 6400 and 6800 files
+#'
+#' @param Licor_fn Licor file to read
+#' @param sw_model Model of Licor or autodetect
+#' @param n_header_rows_min Minimum number of rows to read in order to detect where header ends and data begins
+#'
+#' @return Licor is a list including the header and data
+#' @export
+#'
+#' @examples
 read_Licor <-
   function(
     Licor_fn
