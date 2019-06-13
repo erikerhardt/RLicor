@@ -1,35 +1,54 @@
 read_Licor <-
   function(
     Licor_fn
+  , sw_model   = c("autodetect", 6800, 6400)
+  , n_header_rows_min = 100
   ) {
 
+  ## DEBUG
+  # path <- "C:/Dropbox/StatAcumen/consult/Authorship/2009_DavidHanson_Isotopes/R-package/RLicor/data-raw"
+  # setwd(path)
+  # Licor_fn <- "data_Licor_6400_6-1-3.txt"
+  # Licor_fn <- "data_Licor_6400_6-1-4.txt"
+  # Licor_fn <- "data_Licor_6800_.txt"
 
-  # Read Licor file header
-
-   ####################
-    ## Read Licor file
-    p_o <- paste("               Reading Licor file: ", Licor_fn, "\n"); write_out(p_o);
-    ## Find the row where the column headers and data begin.
-    Licor_head_nrows = 30;  # more rows than we need to check
-    Licor_head <- utils::read.delim(Licor_fn, header=FALSE, sep="\n", nrows=Licor_head_nrows);
-    ##details<<
-    ## Look for "Obs" as the first row (used to look for $STARTOFDATA$, but not in every version of Licor file).
-    #Licor_header_skip = seq(1,Licor_head_nrows)[(Licor_head == "$STARTOFDATA$")];
-    for (i_nrows in 1:Licor_head_nrows){
-      if (substr(Licor_head[i_nrows,],1,3) == "Obs"){
-        Licor_header_skip = i_nrows - 1;
-      }
-    }
-    # 11/22/2010 7:40PM changed
-    Licor$data <- read.delim(Licor_fn, header=TRUE, sep="", skip=Licor_header_skip);     # any white space is delim
+  # list can hold more options later, if helpful
+  Licor_model <-
+    list()
 
   # Determine Licor model and version
+  if (!(sw_model %in% c("autodetect", 6800, 6400))) {
+    warning("Licor sw_model argument not set correctly, defaulting to \"autodetect\".")
+    sw_model <- "autodetect"
+  }
+  if (sw_model == 6800) {
+    Licor_model$model <- 6800
+  }
+  if (sw_model == 6400) {
+    Licor_model$model <- 6400
+  }
+  if (sw_model == "autodetect") {
+    Licor_model <- detect_Licor_model_version(Licor_fn, n_header_rows_min)
+  }
+
+  if (Licor_model$model == "Not Detected") {
+    stop("Licor model (6800 or 6400) could not be automatically detected from file header.")
+  }
+
 
   # Read appropriate version
 
+  if (Licor_model$model == 6800) {
 
+    Licor <- read_Licor_6800(Licor_fn)
 
+  }
 
+  if (Licor_model$model == 6400) {
+
+    Licor <- read_Licor_6400(Licor_fn)
+
+  }
 
   return(Licor)
 }
