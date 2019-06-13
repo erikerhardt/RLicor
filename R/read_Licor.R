@@ -7,11 +7,10 @@
 #' @return Licor is a list including the header and data
 #' @export
 #'
-#' @examples
 read_Licor <-
   function(
     Licor_fn
-  , sw_model   = c("autodetect", 6800, 6400)
+  , sw_model   = c("autodetect", 6800, 6400)[1]
   , n_header_rows_min = 100
   ) {
 
@@ -27,7 +26,7 @@ read_Licor <-
     list()
 
   # Determine Licor model and version
-  if (!(sw_model %in% c("autodetect", 6800, 6400))) {
+  if (!any(sw_model %in% c("autodetect", 6800, 6400))) {
     warning("Licor sw_model argument not set correctly, defaulting to \"autodetect\".")
     sw_model <- "autodetect"
   }
@@ -49,15 +48,13 @@ read_Licor <-
   # Read appropriate version
 
   if (Licor_model$model == 6800) {
-
+    message("Licor 6800 model")
     Licor <- read_Licor_6800(Licor_fn)
-
   }
 
   if (Licor_model$model == 6400) {
-
+    message("Licor 6400 model")
     Licor <- read_Licor_6400(Licor_fn)
-
   }
 
   return(Licor)

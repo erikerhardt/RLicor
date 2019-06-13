@@ -6,7 +6,6 @@
 #' @return Licor_model includes \code{model} number or "Not Detected"
 #' @export
 #'
-#' @examples
 detect_Licor_model_version <-
   function(
     Licor_fn

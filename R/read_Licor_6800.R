@@ -15,7 +15,6 @@
 #'
 #' @export
 #'
-#' @examples
 read_Licor_6800 <-
   function (Licor_fn) {
 

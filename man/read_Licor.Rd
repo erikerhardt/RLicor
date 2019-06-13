@@ -2,33 +2,21 @@
 % Please edit documentation in R/read_Licor.R
 \name{read_Licor}
 \alias{read_Licor}
-\title{read Licor file}
+\title{Read Licor 6400 and 6800 files}
 \usage{
-read_Licor(Licor_fn, Licor_TDL_time_offset_seconds, sw)
+read_Licor(Licor_fn, sw_model = c("autodetect", 6800, 6400),
+  n_header_rows_min = 100)
 }
 \arguments{
-\item{Licor_fn}{xxxPARAMxxx}
+\item{Licor_fn}{Licor file to read}
 
-\item{Licor_TDL_time_offset_seconds}{xxxPARAMxxx}
+\item{sw_model}{Model of Licor or autodetect}
 
-\item{sw}{xxxPARAMxxx}
+\item{n_header_rows_min}{Minimum number of rows to read in order to detect where header ends and data begins}
 }
 \value{
-Licor xxxRETURNxxx
+Licor is a list including the header and data
 }
 \description{
-See \code{\link{val_TDL_Licor_variables}} for expected column names.
-}
-\details{
-Create \code{Licor} to hold data.
-
-Read Licor file
-
-Find the row where the column headers and data begin.
-
-Look for "Obs" as the first row (used to look for $STARTOFDATA$, but not in every version of Licor file).
-
-If any extra lines in Licor file, remove those lines and fix the Obs and HHMMSS columns.
-
-Date (day) of run, fix Thursday (Thr to Thu) representation.
+Read Licor 6400 and 6800 files
 }
