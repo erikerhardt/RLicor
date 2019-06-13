@@ -4,7 +4,7 @@
 \alias{read_Licor}
 \title{Read Licor 6400 and 6800 files}
 \usage{
-read_Licor(Licor_fn, sw_model = c("autodetect", 6800, 6400),
+read_Licor(Licor_fn, sw_model = c("autodetect", 6800, 6400)[1],
   n_header_rows_min = 100)
 }
 \arguments{
