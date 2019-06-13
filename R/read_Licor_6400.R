@@ -1,120 +1,91 @@
-#' read Licor file
-#'
-#' See \code{\link{val_TDL_Licor_variables}} for expected column names.
-#'
-#' Create \code{Licor} to hold data.
+#' read Licor 6400 file
 #'
 #' Read Licor file
-#'
 #' Find the row where the column headers and data begin.
+#' Separate any remarks into its own column.
 #'
-#' Look for "Obs" as the first row (used to look for $STARTOFDATA$, but not in every version of Licor file).
+#' @param Licor_fn Licor filename to read
 #'
-#' If any extra lines in Licor file, remove those lines and fix the Obs and HHMMSS columns.
+#' @return Licor A list including a \code{header} list and \code{data} tibble
+#' @importFrom readr read_file
+#' @importFrom stringr str_split str_replace_na
+#' @importFrom purrr map flatten_chr safely
+#' @importFrom dplyr bind_rows mutate select everything
 #'
-#' Date (day) of run, fix Thursday (Thr to Thu) representation.
+#' @export
 #'
-#' @param Licor_fn xxxPARAMxxx
-#' @param Licor_TDL_time_offset_seconds xxxPARAMxxx
-#' @param sw xxxPARAMxxx
-#'
-#' @return Licor xxxRETURNxxx
-#' @importFrom utils read.delim
-#'
+#' @examples
 read_Licor_6400 <-
-function# read_Licor file
-###
-(Licor_fn
-###
-, Licor_TDL_time_offset_seconds
-###
-, sw
-###
-)
-{
-  ## See \code{\link{val_TDL_Licor_variables}} for expected column names.
+  function (Licor_fn) {
 
-  ## Create \code{Licor} to hold data.
-  Licor <- list();  # create a list to return with data
+  # header and data, separated
+  Licor <- list()
 
-  if (sw$use_Licor ) {
+  # concepts from http://www.ericrscott.com/2018/01/17/li-cor-wrangling/
 
-    ####################
-    ## Read Licor file
-    p_o <- paste("               Reading Licor file: ", Licor_fn, "\n"); write_out(p_o);
-    ## Find the row where the column headers and data begin.
-    Licor_head_nrows = 30;  # more rows than we need to check
-    Licor_head <- utils::read.delim(Licor_fn, header=FALSE, sep="\n", nrows=Licor_head_nrows);
-    ##details<<
-    ## Look for "Obs" as the first row (used to look for $STARTOFDATA$, but not in every version of Licor file).
-    #Licor_header_skip = seq(1,Licor_head_nrows)[(Licor_head == "$STARTOFDATA$")];
-    for (i_nrows in 1:Licor_head_nrows){
-      if (substr(Licor_head[i_nrows,],1,3) == "Obs"){
-        Licor_header_skip = i_nrows - 1;
-      }
-    }
-    # 11/22/2010 7:40PM changed
-    Licor$data <- read.delim(Licor_fn, header=TRUE, sep="", skip=Licor_header_skip);     # any white space is delim
+  # read data in as text to remove header and remark rows from column headers and data
+  Licor_raw <- readr::read_file(Licor_fn)
 
-    ## If any extra lines in Licor file, remove those lines and fix the Obs and HHMMSS columns.
-    fix_factor <- is.factor(Licor$data[,1]);
-      if(fix_factor){
-        p_o <- paste("            Note: Some junk lines in Licor file, removing those lines (may see NA warning)", "\n"); write_out(p_o);
-        Licor$data2 <- utils::read.delim(Licor_fn, header=TRUE, sep="", as.is=TRUE, skip=Licor_header_skip);     # any white space is delim, as.is does not convert to factors
-        na_data <- is.na(as.numeric(Licor$data2[,1]));
-        Licor$data <- Licor$data[!na_data,]; # remove any lines that don't begin with a number -- such as lines: "Const=" -52 "Oxygen%" 2.0
-        Licor$data[,"Obs"   ] <- as.numeric(Licor$data2[!na_data,"Obs"   ]); # fix the affected columns
-        #Licor$data[,"HHMMSS"] <-            Licor$data2[!na_data,"HHMMSS"] ;
-        Licor$data[,"FTime" ] <- as.numeric(Licor$data2[!na_data,"FTime" ]);
-        Licor$data2 <- NULL; # remove after fixing
-      }
+  header_pattern  <- "\"OPEN \\d\\.\\d\\.\\d"
+  data_pattern    <- "\\$STARTOFDATA\\$"
 
-    #Licor$data <- read.delim(Licor_fn, header=TRUE, sep="\t", skip=Licor_header_skip);  # only tabs is delim
-    Licor$n <- dim(Licor$data)[1]; # number of observations
+  # splits into individual bouts
+  Licor_bouts <- stringr::str_split(Licor_raw, header_pattern, simplify = TRUE)
 
-    # 7/15/2010 no longer adding column names -- processing a core set of variables and ignoring the rest
-    ## check whether need to add columns
-    #if ("VpdA" %in% colnames(Licor$data)) {
-    #  Licor$sw_additional_col <- 1; # do nothing, the additional columns are in this file
-    #} else {
-    #  Licor$sw_additional_col <- 0;
-    #      p_o <- paste("Licor file - Note: adding NA columns for VpdA .. xTemp2 columns not in this file\n"); wWw <- write_progress(p_o, time_start);
-    #  temp_add <- matrix(NA, nrow=Licor$n, ncol=11);
-    #  colnames(temp_add) <- c("VpdA","Ci_Ca","Ci_Pa","uc_20_mV","uc_21_mV","X.U.S.","Trans","CndCO2","Ref_mV","xTemp1","xTemp2");
-    #  Licor$data <- cbind(Licor$data, temp_add);
-    #}
+  # splits further to separate headers from actual data
+  Licor_header_data <- stringr::str_split(Licor_bouts, data_pattern, simplify = FALSE)
 
-    ## Date (day) of run, fix Thursday (Thr to Thu) representation.
-    Licor_date_temp   <- scan(Licor_fn, what="character", skip=1, nlines=1);
-      Licor_date_temp <- sub("Thr", "Thu", Licor_date_temp);  # Thursday has an alternate representation in Licor than R
-    Licor_date_start  <- strptime(Licor_date_temp, "%a %b %d %Y %H:%M:%S"); #, tz=Sys.timezone());
-    Licor_date        <- format(Licor_date_start, "%Y-%m-%d")
+  # separate header and data, remove empty elements (first is always empty)
+  Licor$header <-
+    Licor_header_data %>%
+    purrr::map(`[`, 1) %>% #equivalent to doing raw_split2[[i]][2] for every element "i"
+    purrr::flatten_chr() #converts to a vector
+  Licor$header <-
+    Licor$header[!(Licor$header == "")]
 
-    # variables for each column
-    Licor_HHMMSS      <- Licor$data[, "HHMMSS"];
-    Licor_FTime       <- Licor$data[, "FTime"];
+  dat_temp <-
+    Licor_header_data %>%
+    purrr::map(`[`, 2) %>% # equivalent to doing Licor_header_data[[i]][2] for every element "i"
+    purrr::flatten_chr() # converts to a vector
+  dat_temp <-
+    dat_temp[!is.na(dat_temp)]
 
-      #Licor_time_no_correction  <- strptime(paste(Licor_date, Licor_HHMMSS), "%Y-%m-%d %H:%M:%OS"); #, tz=Sys.timezone());
-      Licor_time_start          <- strptime(paste(Licor_date, Licor_HHMMSS[1]), "%Y-%m-%d %H:%M:%OS"); #, tz=Sys.timezone());
-      Licor_time_first_decimal  <- Licor_FTime[1];
-      Licor_time_corrected      <- Licor_time_start + as.numeric(Licor_FTime) - as.numeric(Licor_time_first_decimal) + Licor_TDL_time_offset_seconds;
-      #seconds_diff_Licor = as.numeric(difftime(Licor_time_corrected,Licor_time_no_correction, tz=Sys.timezone(), units="secs"));
-      #seconds_diff_Licor = as.numeric(difftime(Licor_time_corrected[1:(Licor_n-1)],Licor_time_corrected[2:Licor_n], tz=Sys.timezone(), units="secs"));
-         # > table(-seconds_diff_Licor)
-         #   9.5   10 10.5   11
-         #     1   36  136    2
+  dat_temp2 <-
+    dat_temp %>%
+    purrr::map(read_tsv, skip = 1) %>%
+    dplyr::bind_rows()
 
-      Licor$time <- Licor_time_corrected;
-  } else {
-    p_o <- paste("                Not using Licor file", "\n"); write_out(p_o);
-    Licor$data <- list();
+  # create a "safe" version of as.integer() that returns a list of a result and error
+  # returns error for text remarks, returns value for integer observation numbers
+  safe_as.int <-
+    purrr::safely(as.integer)
 
-    Licor$n    <- NA;
-    Licor$time <- NA;
+  dat_temp3 <-
+    dat_temp2 %>%
+    dplyr::mutate(
+      # create a comment column to indicate if an "Obs" is actually a remark
+      comment = is.na(safe_as.int(Obs)$result)
+      # copy those remarks to the remark column
+    , remark = ifelse(comment == TRUE, Obs, NA)
+      # remove remarks from Obs column
+    , Obs = ifelse(comment == FALSE, Obs, NA)
+    ) %>%
+    # move the remark column the the begining
+    dplyr::select(
+        remark
+      , dplyr::everything()
+      ) %>%
+    # remove the temporary comment column.
+    dplyr::select(-comment) %>%
+    # replace NA with the literal string "NA" so str_* functions from stringr can deal with it
+    mutate(
+      remark = stringr::str_replace_na(remark)
+    )
 
-  };
+  Licor$data <-
+    dat_temp3
 
-  return( Licor );
-  ### Licor
+  return(Licor)
 }
+
 
