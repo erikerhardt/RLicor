@@ -57,6 +57,9 @@ read_Licor <-
     Licor <- read_Licor_6400(Licor_fn)
   }
 
+  # Include model version in output since output differs by model
+  Licor$model <- Licor_model$model
+
   return(Licor)
 }
 
