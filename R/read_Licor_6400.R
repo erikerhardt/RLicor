@@ -98,10 +98,14 @@ read_Licor_6400 <-
     ) %>%
     # remove the temporary comment column.
     dplyr::select(-comment) %>%
-    # replace NA with the literal string "NA" so str_* functions from stringr can deal with it
     dplyr::mutate(
-      remark = stringr::str_replace_na(remark)
+      Obs = as.numeric(Obs)
     )
+    #%>%
+    ## replace NA with the literal string "NA" so str_* functions from stringr can deal with it
+    #dplyr::mutate(
+    #  remark = stringr::str_replace_na(remark)
+    #)
 
   Licor$data <-
     dat_temp3

@@ -15,6 +15,7 @@ read_Licor <-
   ) {
 
   ## DEBUG
+  # library(RLicor)
   # path <- "C:/Dropbox/StatAcumen/consult/Authorship/2009_DavidHanson_Isotopes/package_testing/RLicor/data-raw"
   # setwd(path)
   # Licor_fn <- "data_Licor_6400_6-1-3.txt"
