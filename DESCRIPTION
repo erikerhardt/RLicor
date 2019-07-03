@@ -2,6 +2,7 @@ Package: RLicor
 Type: Package
 Title: Read Licor files
 Version: 0.0.01
+Date: 2019-06-14
 Author: Erik B. Erhardt <erike@stat.unm.edu>
 Maintainer: Erik B. Erhardt <erike@stat.unm.edu>
 Description: Reads Licor files from 6400 and 6800, detecting version automatically.

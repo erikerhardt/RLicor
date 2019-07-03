@@ -60,6 +60,8 @@ read_Licor <-
     Licor <- read_Licor_6400(Licor_fn)
   }
 
+  print(citation(package="RLicor"))
+
   return(Licor)
 }
 
